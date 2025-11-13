@@ -7,11 +7,14 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import org.springframework.graphql.client.GraphQlTransportException;
 import org.springframework.stereotype.Component;
 import bot.stock.stobot.services.AnilistService;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+
 import java.awt.*;
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 @Component
@@ -39,48 +42,53 @@ public class InfoFeature extends ListenerAdapter implements SlashCommandProvider
 
 
         anilist.searchManga(search)
-                // If nothing emits in 5 seconds, trigger TimeoutException
                 .timeout(Duration.ofSeconds(5))
                 .subscribe(media -> {
-                    
-                    if (media == null) {
-                        event.getHook().sendMessage("No results found.").queue();
-                        return;
-                    }
 
                     String title = firstNonNull(
                             media.title().english(),
                             media.title().romaji()
                     );
-
-                    String synonyms = media.synonyms() != null && !media.synonyms().isEmpty()
-                            ? String.join(", ", media.synonyms())
-                            : "None";
-
+                    String synonyms = "";
+                    if(media.synonyms() != null && !media.synonyms().isEmpty()){
+                        List<String> filteredSynonime = media.synonyms().stream().filter(str -> str.matches("^[a-zA-Z0-9\\s'!?:.,-]+")).toList();
+                        synonyms = String.join("\n", filteredSynonime);
+                    }
                     if (!media.title().romaji().equals(title)) {
-                        if (synonyms.equals("None")) synonyms = media.title().romaji();
-                        else synonyms += ", " + media.title().romaji();
+                        if (synonyms.isEmpty()) synonyms = media.title().romaji();
+                        else synonyms += "\n" + media.title().romaji();
                     }
 
                     String desc = media.description() != null
-                            ? media.description().replaceAll("<.+?>", "")
+                            ? media.description().replaceAll("<.+?>", "").replaceAll("\\s*\\(Source: [^)]+\\)", "")
                             : "No description available.";
-
-                    if (desc.length() > 800) desc = desc.substring(0, 800) + "...";
 
                     EmbedBuilder embed = new EmbedBuilder()
                             .setTitle(title)
                             .setThumbnail(media.coverImage().large())
                             .setColor(Color.decode("#7851a9"))
-                            .addField("Status: ", media.status().toLowerCase().strip(), true)
-                            .addField("Alternative Names:", synonyms, false)
-                            .addField("Summary:", desc, false);
+                            .addField("Status:", media.status().toLowerCase().strip(), true);
+
+                    if(media.chapters() != 0){
+                        embed.addField("Chapter:", "" + media.chapters(), true);
+                    }
+                    if(!synonyms.isEmpty()){
+                        embed.addField("Alternative Names:", synonyms, false);
+                    }
+                    embed.addField("Summary:", desc, false);
 
                     event.getHook().sendMessageEmbeds(embed.build()).queue();
                 }, throwable -> {
-                    String msg = (throwable instanceof TimeoutException)
-                            ? "Search timed out after 5 seconds. Please try again."
-                            : "An unexpected error occurred while searching.";
+                    String msg = "";
+                    if (throwable instanceof GraphQlTransportException transport &&
+                            transport.getCause() instanceof WebClientResponseException ex &&
+                            ex.getStatusCode().value() == 404) {
+                            msg = "\""+ search + "\" not found";
+                    } else if (throwable instanceof TimeoutException) {
+                        msg = "Search timed out after 5 seconds. Please try again.";
+                    }else
+                        msg = "An unexpected error occurred while searching.";
+
                     event.getHook().sendMessage(msg).queue();
                 });
     }

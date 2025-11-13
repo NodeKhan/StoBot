@@ -19,8 +19,12 @@ public class AnilistService {
         String doc = """
             query($search: String){
               Media(search: $search, type: MANGA){
-                title{romaji english native}
-                synonyms status coverImage{large}
+                id
+                title{romaji english}
+                synonyms
+                status
+                chapters
+                coverImage{large}
                 description(asHtml:false)
               }
             }
@@ -33,8 +37,8 @@ public class AnilistService {
     }
 
     // DTOs
-    public record MediaResponse(Title title, List<String> synonyms, String status,
+    public record MediaResponse(int id, Title title, List<String> synonyms, String status, int chapters,
                                 CoverImage coverImage, String description) {}
-    public record Title(String romaji, String english, @JsonProperty("native") String native_title) {}
+    public record Title(String romaji, String english) {}
     public record CoverImage(String large) {}
 }
