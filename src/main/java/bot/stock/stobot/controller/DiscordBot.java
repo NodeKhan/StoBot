@@ -53,5 +53,11 @@ public class DiscordBot {
         } else {
             System.err.println("Guild not found: " + guildId);
         }
+        jda.updateCommands()
+                .addCommands(commands)
+                .queue(
+                        ok -> System.out.println("Registered " + commands.size() + " commands for world"),
+                        err -> System.err.println("Failed to register commands: " + err.getMessage())
+                );
     }
 }

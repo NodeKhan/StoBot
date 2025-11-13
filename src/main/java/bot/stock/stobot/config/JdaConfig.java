@@ -26,7 +26,6 @@ public class JdaConfig {
                         GatewayIntent.MESSAGE_CONTENT
                 )
                 .build();
-        jda.updateCommands().addCommands().queue();
 
         jda.awaitReady();
         return jda;
