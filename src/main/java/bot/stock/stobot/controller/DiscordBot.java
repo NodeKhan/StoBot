@@ -1,5 +1,6 @@
 package bot.stock.stobot.controller;
 
+import bot.stock.stobot.bot.KillFeature;
 import bot.stock.stobot.interfaces.SlashCommandProvider;
 import jakarta.annotation.PostConstruct;
 import net.dv8tion.jda.api.JDA;
@@ -19,17 +20,19 @@ public class DiscordBot {
     private final List<EventListener> listeners;
     private final List<SlashCommandProvider> commandProviders;
     private final String guildId;
+    private final KillFeature killFeature;
 
     public DiscordBot(
             JDA jda,
             List<EventListener> listeners,
             List<SlashCommandProvider> commandProviders,
-            @Value("${discord.guild-id}") String guildId
+            @Value("${discord.guild-id}") String guildId, KillFeature killFeature
     ) {
         this.jda = jda;
         this.listeners = listeners;
         this.commandProviders = commandProviders;
         this.guildId = guildId;
+        this.killFeature = killFeature;
     }
 
     @PostConstruct
@@ -50,6 +53,10 @@ public class DiscordBot {
                             ok -> System.out.println("Registered " + commands.size() + " commands for guild " + guild.getName()),
                             err -> System.err.println("Failed to register commands: " + err.getMessage())
                     );
+            guild.updateCommands().addCommands(killFeature.command()).queue(
+                    ok -> System.out.println("kill switch added"),
+                    err -> System.err.println("Failed to register kill switch: " + err.getMessage())
+            );
         } else {
             System.err.println("Guild not found: " + guildId);
         }
