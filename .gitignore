@@ -35,3 +35,5 @@ build/
 src/main/java/bot/stock/stobot/old/
 
 
+
+.env
