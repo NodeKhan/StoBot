@@ -18,7 +18,7 @@ public class AnilistService {
     public Mono<MediaResponse> searchManga(String name) {
         String doc = """
             query($search: String){
-              Media(search: $search, type: MANGA){
+              Media(search: $search, type: MANGA, isAdult: false){
                 id
                 title{romaji english}
                 synonyms

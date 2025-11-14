@@ -1,5 +1,6 @@
 package bot.stock.stobot.config;
 
+import bot.stock.stobot.utils.AniListRateLimiter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.graphql.client.HttpGraphQlClient;
@@ -9,17 +10,31 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class AnilistClientConfig {
 
     @Bean
-    WebClient anilistWebClient(WebClient.Builder builder) {
+    WebClient anilistWebClient(WebClient.Builder builder, AniListRateLimiter limiter) {
         return builder
                 .baseUrl("https://graphql.anilist.co")
                 .defaultHeader("User-Agent", "StoBot")
-                .filter((request, next) -> next.exchange(request)
+                .filter((request, next) ->
+                        limiter.awaitPermission().then(
+                        next.exchange(request)
                         .doOnNext(response -> {
-                            System.out.println("X-RateLimit-Limit = " + response.headers().asHttpHeaders().getFirst("RateLimit-Limit"));
-                            System.out.println("X-RateLimit-Remaining = " + response.headers().asHttpHeaders().getFirst("RateLimit-Remaining"));
-                            System.out.println("X-RateLimit-Reset = " + response.headers().asHttpHeaders().getFirst("RateLimit-Reset"));
+                            String limit = response.headers().asHttpHeaders()
+                                    .getFirst("X-RateLimit-Limit");
+                            String remaining = response.headers().asHttpHeaders()
+                                    .getFirst("X-RateLimit-Remaining");
+                            String reset = response.headers().asHttpHeaders()
+                                    .getFirst("X-RateLimit-Reset");
+
+                            System.out.println("Anilist rate current limit = " + limit);
+                            System.out.println("Anilist rate remaining = " + remaining);
+                            if (remaining != null && remaining.equals("0") && reset != null){
+                                long timer = Long.parseLong(reset);
+                                long waitSeconds = Math.max(0, timer - System.currentTimeMillis() / 1000L);
+                                System.out.println("Blocking requests for " + waitSeconds + " seconds.");
+
+                            }
                         })
-                )
+                ))
                 .build();
     }
 
