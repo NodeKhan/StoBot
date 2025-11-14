@@ -1,6 +1,7 @@
 package bot.stock.stobot.bot;
 
 import bot.stock.stobot.interfaces.SlashCommandProvider;
+import bot.stock.stobot.services.MangaTitlesService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -21,9 +22,11 @@ import java.util.concurrent.TimeoutException;
 public class InfoFeature extends ListenerAdapter implements SlashCommandProvider {
 
     private final AnilistService anilist;
+    private final MangaTitlesService mts;
 
-    public InfoFeature(AnilistService anilist) {
+    public InfoFeature(AnilistService anilist, MangaTitlesService mts) {
         this.anilist = anilist;
+        this.mts = mts;
     }
 
     @Override
@@ -78,6 +81,14 @@ public class InfoFeature extends ListenerAdapter implements SlashCommandProvider
                     embed.addField("Summary:", desc, false);
 
                     event.getHook().sendMessageEmbeds(embed.build()).queue();
+
+                    // add information into the DB
+                    mts.addTitle(media.id(),title,true);
+                    for(String s: synonyms.split("\n")){
+                        mts.addTitle(media.id(),s,false);
+                    }
+
+
                 }, throwable -> {
                     String msg = "";
                     if (throwable instanceof GraphQlTransportException transport &&
@@ -90,6 +101,9 @@ public class InfoFeature extends ListenerAdapter implements SlashCommandProvider
                         msg = "An unexpected error occurred while searching.";
 
                     event.getHook().sendMessage(msg).queue();
+
+
+
                 });
     }
 
