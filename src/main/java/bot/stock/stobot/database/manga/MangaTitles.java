@@ -1,11 +1,11 @@
-package bot.stock.stobot.model;
+package bot.stock.stobot.database.manga;
 
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "MangaTitles")
+@Table(name = "manga_titles")
 public class MangaTitles {
 
     @Column(nullable = false)

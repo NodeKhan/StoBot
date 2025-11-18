@@ -1,6 +1,6 @@
 package bot.stock.stobot.config;
 
-import bot.stock.stobot.utils.AniListRateLimiter;
+import bot.stock.stobot.bot.core.AniListRateLimiter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.graphql.client.HttpGraphQlClient;

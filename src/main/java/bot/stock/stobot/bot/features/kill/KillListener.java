@@ -1,6 +1,5 @@
-package bot.stock.stobot.bot;
+package bot.stock.stobot.bot.features.kill;
 
-import bot.stock.stobot.interfaces.SlashCommandProvider;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -9,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 @Component
-public class KillFeature  extends ListenerAdapter{
+public class KillListener extends ListenerAdapter{
     public CommandData command() {
         return Commands.slash("kill", "kill the bot");
     }

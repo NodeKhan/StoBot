@@ -1,4 +1,4 @@
-package bot.stock.stobot.utils;
+package bot.stock.stobot.bot.core;
 
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;

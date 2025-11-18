@@ -1,7 +1,7 @@
 package bot.stock.stobot.services;
 
-import bot.stock.stobot.interfaces.MangaTitlesRepository;
-import bot.stock.stobot.model.MangaTitles;
+import bot.stock.stobot.database.utils.MangaTitlesRepository;
+import bot.stock.stobot.database.manga.MangaTitles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

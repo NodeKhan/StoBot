@@ -1,6 +1,5 @@
 package bot.stock.stobot.services;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -36,7 +35,6 @@ public class AnilistService {
                 .toEntity(MediaResponse.class);
     }
 
-    // DTOs
     public record MediaResponse(int id, Title title, List<String> synonyms, String status, int chapters,
                                 CoverImage coverImage, String description) {}
     public record Title(String romaji, String english) {}

@@ -1,6 +1,6 @@
-package bot.stock.stobot.interfaces;
+package bot.stock.stobot.database.utils;
 
-import bot.stock.stobot.model.MangaTitles;
+import bot.stock.stobot.database.manga.MangaTitles;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MangaTitlesRepository extends JpaRepository<MangaTitles, String> {
