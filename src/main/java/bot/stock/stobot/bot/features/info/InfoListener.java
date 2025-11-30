@@ -27,9 +27,7 @@ public class InfoListener extends ListenerAdapter implements SlashCommandProvide
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         if (!event.getName().equals("info")) return;
         String search = event.getOption("name").getAsString();
-        System.out.println(search);
         event.deferReply().submit()
                 .thenAccept(hook -> service.process(search, hook));
-
     }
 }

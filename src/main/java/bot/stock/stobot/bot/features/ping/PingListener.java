@@ -21,6 +21,8 @@ public class PingListener extends ListenerAdapter implements SlashCommandProvide
 
         long gatewayPing = event.getJDA().getGatewayPing();
         event.reply("Pong! `" + gatewayPing + " ms`").setEphemeral(false).queue();
+
+        System.out.println("PingListener received event: " + event.getName());
     }
 }
 

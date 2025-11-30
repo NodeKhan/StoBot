@@ -7,8 +7,17 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SaveListener extends ListenerAdapter implements SlashCommandProvider {
+
+    private final SaveService saveService;
+
+    public SaveListener(SaveService saveService) {
+        this.saveService = saveService;
+    }
+
     @Override
     public CommandData command() {
         return Commands.slash("save", "Saves the user's last-read chapter")
@@ -20,13 +29,12 @@ public class SaveListener extends ListenerAdapter implements SlashCommandProvide
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (!event.getName().equals("save")) return;
 
-        long gatewayPing = event.getJDA().getGatewayPing();
-        event.reply("Pong! `" + gatewayPing + " ms`").setEphemeral(false).queue();
+        final String name = event.getOption("name").getAsString().trim();
+        final int chapter = event.getOption("chapter").getAsInt();
+        final long userid = event.getUser().getIdLong();
 
-        gatewayPing = event.getJDA().getGatewayPing();
-        event.reply("Pong! `" + gatewayPing + " ms`").setEphemeral(false).queue();
-
-        gatewayPing = event.getJDA().getGatewayPing();
-        event.reply("Pong! `" + gatewayPing + " ms`").setEphemeral(false).queue();
+        event.deferReply(true).queue(hook ->
+                saveService.process(name, chapter, userid, hook)
+        );
     }
 }
