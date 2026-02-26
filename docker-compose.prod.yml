@@ -1,0 +1,32 @@
+services:
+  mariadb:
+    image: mariadb:11
+    container_name: stobot-mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: stobot
+      MARIADB_USER: stobot
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+    volumes:
+      - stobot_db:/var/lib/mysql
+    restart: unless-stopped
+
+  stobot:
+    image: ghcr.io/nodekhan/stobot:latest
+    container_name: stobot-app
+    depends_on:
+      - mariadb
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/stobot
+      SPRING_DATASOURCE_USERNAME: stobot
+      SPRING_DATASOURCE_PASSWORD: ${MARIADB_PASSWORD}
+
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      DISCORD_GUILD: ${DISCORD_GUILD}
+
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    restart: unless-stopped
+
+volumes:
+  stobot_db:
