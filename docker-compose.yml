@@ -1,0 +1,35 @@
+services:
+  mariadb:
+    image: mariadb:11
+    container_name: stobot-mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: stobot
+      MARIADB_USER: stobot
+      MARIADB_PASSWORD: stobotpass
+    ports:
+      - "3306:3306"
+    volumes:
+      - stobot_db:/var/lib/mysql
+
+  stobot:
+    build: .
+    container_name: stobot-app
+    depends_on:
+      - mariadb
+    environment:
+      # DB (Spring Boot lit ça automatiquement)
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/stobot
+      SPRING_DATASOURCE_USERNAME: stobot
+      SPRING_DATASOURCE_PASSWORD: stobotpass
+
+      # Ton token discord (à mettre dans un .env, pas en dur)
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      DISCORD_GUILD: ${DISCORD_GUILD}
+
+      # Optionnel si tu utilises JPA
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    restart: unless-stopped
+
+volumes:
+  stobot_db:
