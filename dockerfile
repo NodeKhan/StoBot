@@ -7,19 +7,15 @@ COPY .mvn .mvn
 COPY mvnw .
 RUN chmod +x mvnw
 
-# Télécharge les dépendances (cache docker)
-RUN ./mvnw -q -DskipTests dependency:go-offline
+# Télécharge les dépendances (cache Maven via BuildKit)
+RUN --mount=type=cache,target=/root/.m2 ./mvnw -q -DskipTests dependency:go-offline
 
 COPY src src
-RUN ./mvnw -DskipTests clean package
+RUN --mount=type=cache,target=/root/.m2 ./mvnw -DskipTests clean package
 
 # ---- Run stage ----
 FROM eclipse-temurin:21-jre
 WORKDIR /app
-
 COPY --from=build /app/target/*.jar app.jar
-
-# Optionnel: profil spring par défaut
 ENV SPRING_PROFILES_ACTIVE=docker
-
 CMD ["java", "-jar", "app.jar"]
