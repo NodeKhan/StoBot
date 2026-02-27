@@ -15,6 +15,6 @@ jobs:
       - name: Pull and restart with compose
         run: |
           cd /opt/stobot
-          podman compose -f docker-compose.prod.yml pull
-          podman compose -f docker-compose.prod.yml up -d --remove-orphans
-          podman image prune -f
+          docker compose -f docker-compose.prod.yml pull
+          docker compose -f docker-compose.prod.yml up -d --remove-orphans
+          docker image prune -f

@@ -17,15 +17,20 @@ services:
     depends_on:
       - mariadb
     environment:
+      # DB
       SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/stobot
       SPRING_DATASOURCE_USERNAME: stobot
       SPRING_DATASOURCE_PASSWORD: ${MARIADB_PASSWORD}
 
+      #Discord
       DISCORD_TOKEN: ${DISCORD_TOKEN}
       DISCORD_GUILD: ${DISCORD_GUILD}
 
-      SPRING_PROFILES_ACTIVE: docker
+      #Spring
+      SPRING_PROFILES_ACTIVE: docker, prod
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+
     restart: unless-stopped
 
 volumes:

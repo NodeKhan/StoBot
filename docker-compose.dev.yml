@@ -18,17 +18,18 @@ services:
     depends_on:
       - mariadb
     environment:
-      # DB (Spring Boot lit ça automatiquement)
+      # DB
       SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/stobot
       SPRING_DATASOURCE_USERNAME: stobot
       SPRING_DATASOURCE_PASSWORD: stobotpass
 
-      # Ton token discord (à mettre dans un .env, pas en dur)
+      # Discord
       DISCORD_TOKEN: ${DISCORD_TOKEN}
       DISCORD_GUILD: ${DISCORD_GUILD}
 
-      # Optionnel si tu utilises JPA
+      # Spring
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_PROFILES_ACTIVE: dev
     restart: unless-stopped
 
 volumes:
