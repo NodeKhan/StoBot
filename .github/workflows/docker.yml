@@ -1,5 +1,4 @@
 name: Build and push Docker image
-
 on:
   push:
     branches: [ "master" ]
@@ -22,9 +21,10 @@ jobs:
           cache: maven
 
       - name: Build jar
-        run: ./mvnw -DskipTests clean package
+        run: ./mvnw -DskipTests -q clean package
 
       - uses: docker/setup-qemu-action@v3
+
       - uses: docker/setup-buildx-action@v3
 
       - name: Login to GHCR
@@ -34,10 +34,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push (fast)
+      - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: Dockerfile.ci        # ← utilise le Dockerfile simplifié
           push: true
           platforms: linux/arm64
           tags: |
