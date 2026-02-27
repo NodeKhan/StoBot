@@ -58,6 +58,9 @@ public class BotInitializer{
             }
 
             this.guild = jda.getGuildById(GuildID);
+            for (EventListener eventListener : listeners) {
+                jda.addEventListener(eventListener);
+            }
         }
 
     }
