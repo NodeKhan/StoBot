@@ -1,6 +1,6 @@
 package bot.stock.stobot.bot.features.ping;
 
-import bot.stock.stobot.bot.core.SlashCommandProvider;
+import bot.stock.stobot.bot.core.CommandsProvider;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PingListener extends ListenerAdapter implements SlashCommandProvider {
+public class PingListener extends ListenerAdapter implements CommandsProvider.PublicSlashCommand {
     @Override
     public CommandData command() {
         return Commands.slash("ping", "Check the bot latency");

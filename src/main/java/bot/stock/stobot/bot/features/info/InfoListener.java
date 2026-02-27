@@ -1,6 +1,6 @@
 package bot.stock.stobot.bot.features.info;
 
-import bot.stock.stobot.bot.core.SlashCommandProvider;
+import bot.stock.stobot.bot.core.CommandsProvider;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.springframework.stereotype.Component;
 
 @Component
-public class InfoListener extends ListenerAdapter implements SlashCommandProvider {
+public class InfoListener extends ListenerAdapter implements CommandsProvider.PublicSlashCommand {
 
     private final InfoService service;
 

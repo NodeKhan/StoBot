@@ -1,6 +1,6 @@
 package bot.stock.stobot.bot.features.save;
 
-import bot.stock.stobot.bot.core.SlashCommandProvider;
+import bot.stock.stobot.bot.core.CommandsProvider;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SaveListener extends ListenerAdapter implements SlashCommandProvider {
+public class SaveListener extends ListenerAdapter implements CommandsProvider.PublicSlashCommand {
 
     private final SaveService saveService;
 
