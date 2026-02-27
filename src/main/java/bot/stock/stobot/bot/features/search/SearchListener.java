@@ -1,4 +1,4 @@
-package bot.stock.stobot.bot.features.info;
+package bot.stock.stobot.bot.features.search;
 
 import bot.stock.stobot.bot.core.CommandsProvider;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -9,23 +9,23 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.springframework.stereotype.Component;
 
 @Component
-public class InfoListener extends ListenerAdapter implements CommandsProvider.PublicSlashCommand {
+public class SearchListener extends ListenerAdapter implements CommandsProvider.PublicSlashCommand {
 
-    private final InfoService service;
+    private final SearchService service;
 
-    public InfoListener(InfoService service) {
+    public SearchListener(SearchService service) {
         this.service = service;
     }
 
     @Override
     public CommandData command() {
-        return Commands.slash("info","get manga info")
+        return Commands.slash("search","get manga info")
                 .addOption(OptionType.STRING, "name", "Manga name", true);
     }
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (!event.getName().equals("info")) return;
+        if (!event.getName().equals("search")) return;
         String search = event.getOption("name").getAsString();
         event.deferReply().submit()
                 .thenAccept(hook -> service.process(search, hook));

@@ -1,6 +1,5 @@
-package bot.stock.stobot.bot.features.info;
+package bot.stock.stobot.bot.features.search;
 
-import bot.stock.stobot.database.manga.MangaAltTitles;
 import bot.stock.stobot.database.manga.MangaData;
 import bot.stock.stobot.services.AnilistService;
 import bot.stock.stobot.services.MangaAltTitlesService;
@@ -18,7 +17,7 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 @Component
-public class InfoService {
+public class SearchService {
     private final AnilistService anilist;
     private final MangaAltTitlesService mts;
     private final MangaDataService mangaDataService;
@@ -26,7 +25,7 @@ public class InfoService {
     @Value("${discord.color}")
     private String discordColor;
 
-    public InfoService(AnilistService anilist, MangaAltTitlesService mts, MangaDataService mangaDataService) {
+    public SearchService(AnilistService anilist, MangaAltTitlesService mts, MangaDataService mangaDataService) {
         this.anilist = anilist;
         this.mts = mts;
         this.mangaDataService = mangaDataService;
