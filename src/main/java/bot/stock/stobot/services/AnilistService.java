@@ -4,11 +4,33 @@ import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class AnilistService {
+
+    private static final String SEARCH_QUERY = """
+        query($search: String, $formats: [MediaFormat]) {
+          Media(search: $search, type: MANGA, isAdult: false, format_in: $formats) {
+            id
+            title { romaji english }
+            synonyms
+            status
+            chapters
+            format
+            coverImage { large }
+            description(asHtml: false)
+          }
+        }
+    """;
+
+    private static final List<String> ALLOWED_FORMATS = List.of("MANGA", "ONE_SHOT");
+    private static final String ALT_TITLE_PATTERN = "^[a-zA-Z0-9\\s'!?:.,-]+";
+    private static final String HTML_TAG_PATTERN = "<.+?>";
+    private static final String SOURCE_PATTERN = "\\s*\\(Source: [^)]+\\)";
+
     private final HttpGraphQlClient gql;
 
     public AnilistService(HttpGraphQlClient anilistGraphQlClient) {
@@ -16,64 +38,81 @@ public class AnilistService {
     }
 
     public Mono<MangaRecord> searchManga(String name) {
-        String doc = """
-            query($search: String){
-              Media(search: $search, type: MANGA, isAdult: false){
-                id
-                title{romaji english}
-                synonyms
-                status
-                chapters
-                coverImage{large}
-                description(asHtml:false)
-              }
-            }
-        """;
-
-        return gql.document(doc)
+        return gql.document(SEARCH_QUERY)
                 .variable("search", name)
+                .variable("formats", ALLOWED_FORMATS)
                 .retrieve("Media")
                 .toEntity(MediaResponse.class)
-                .map(this::processResponse);
+                .mapNotNull(this::toMangaRecord);
     }
 
+    // ---- Records ----
+
     public record Title(String romaji, String english) {}
+
     public record CoverImage(String large) {}
 
-    public record MediaResponse(int id, Title title, List<String> synonyms, String status, int chapters,
-                                CoverImage coverImage, String description) {}
-    public record MangaRecord(int id, String title, List<String> altTitles, String status, int chapters,
-                              String coverUrl, String description) {}
+    public record MediaResponse(
+            int id,
+            Title title,
+            List<String> synonyms,
+            String status,
+            int chapters,
+            String format,
+            CoverImage coverImage,
+            String description
+    ) {}
 
-    private MangaRecord processResponse(MediaResponse m) {
-        if(m == null) return null;
-        String title = m.title().english() != null ? m.title().english() : m.title().romaji();
+    public record MangaRecord(
+            int id,
+            String title,
+            List<String> altTitles,
+            String status,
+            int chapters,
+            String coverUrl,
+            String description
+    ) {}
 
-        List<String> altTitle = new ArrayList<>();
-        if(m.synonyms() != null && !m.synonyms().isEmpty()){
-            for(String s : m.synonyms()){
-                if(s.matches("^[a-zA-Z0-9\\s'!?:.,-]+")){
-                    altTitle.add(s);
-                }
-            }
-        }
-        if (!m.title().romaji().equals(title)) {
-            altTitle.add(m.title().romaji());
-        }
+    // ---- Mapping ----
 
-        String desc = (m.description() == null ? "No description available." : m.description())
-                .replaceAll("<.+?>", "")
-                .replaceAll("\\s*\\(Source: [^)]+\\)", "");
+    private MangaRecord toMangaRecord(MediaResponse m) {
+        if (m == null) return null;
 
+        String title = resolveTitle(m.title());
+        List<String> altTitles = resolveAltTitles(m.synonyms(), m.title(), title);
+        String description = cleanDescription(m.description());
 
         return new MangaRecord(
                 m.id(),
                 title,
-                altTitle,
+                altTitles,
                 m.status(),
                 m.chapters(),
                 m.coverImage().large(),
-                desc
-        );}
+                description
+        );
+    }
 
+    private String resolveTitle(Title title) {
+        return title.english() != null ? title.english() : title.romaji();
+    }
+
+    private List<String> resolveAltTitles(List<String> synonyms, Title title, String mainTitle) {
+        List<String> altTitles = synonyms == null ? new java.util.ArrayList<>() : synonyms.stream()
+                .filter(s -> s.matches(ALT_TITLE_PATTERN))
+                .collect(Collectors.toCollection(java.util.ArrayList::new));
+
+        if (!Objects.equals(title.romaji(), mainTitle)) {
+            altTitles.add(title.romaji());
+        }
+
+        return altTitles;
+    }
+
+    private String cleanDescription(String description) {
+        return Objects.requireNonNullElse(description, "No description available.")
+                .replaceAll(HTML_TAG_PATTERN, "")
+                .replaceAll(SOURCE_PATTERN, "")
+                .strip();
+    }
 }
