@@ -2,6 +2,8 @@ package bot.stock.stobot.services;
 
 import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.stereotype.Service;
+
+import bot.stock.stobot.utils.Manga;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -37,13 +39,13 @@ public class AnilistService {
         this.gql = anilistGraphQlClient;
     }
 
-    public Mono<MangaRecord> searchManga(String name) {
+    public Mono<Manga> searchManga(String name) {
         return gql.document(SEARCH_QUERY)
                 .variable("search", name)
                 .variable("formats", ALLOWED_FORMATS)
                 .retrieve("Media")
                 .toEntity(MediaResponse.class)
-                .mapNotNull(this::toMangaRecord);
+                .mapNotNull(this::toManga);
     }
 
     // ---- Records ----
@@ -63,33 +65,24 @@ public class AnilistService {
             String description
     ) {}
 
-    public record MangaRecord(
-            int id,
-            String title,
-            List<String> altTitles,
-            String status,
-            int chapters,
-            String coverUrl,
-            String description
-    ) {}
-
     // ---- Mapping ----
 
-    private MangaRecord toMangaRecord(MediaResponse m) {
+    private Manga toManga(MediaResponse m) {
         if (m == null) return null;
 
         String title = resolveTitle(m.title());
         List<String> altTitles = resolveAltTitles(m.synonyms(), m.title(), title);
         String description = cleanDescription(m.description());
 
-        return new MangaRecord(
-                m.id(),
-                title,
-                altTitles,
-                m.status(),
-                m.chapters(),
-                m.coverImage().large(),
-                description
+        return new Manga(
+            title,
+            altTitles,
+            m.status().toLowerCase(),
+            m.format(),
+            m.chapters(),
+            m.coverImage().large(),
+            description,
+            m.id()
         );
     }
 

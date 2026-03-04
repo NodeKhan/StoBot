@@ -3,6 +3,8 @@ package bot.stock.stobot.services;
 import bot.stock.stobot.database.manga.MangaAltTitles;
 import bot.stock.stobot.database.manga.MangaData;
 import bot.stock.stobot.database.utils.MangaDataRepository;
+import bot.stock.stobot.utils.Manga;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +37,7 @@ public class MangaDataService {
         return mangaDataRepository.save(mangaData);
     }
 
-    public MangaData fromAnilist(AnilistService.MangaRecord result) {
+    public MangaData fromAnilist(Manga result) {
         return existsByTitle(result.title()) ? findMangaDataByTitle(result.title()) : newMangaData(result.title(),result.altTitles());
     }
 

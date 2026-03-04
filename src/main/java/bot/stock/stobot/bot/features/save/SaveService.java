@@ -6,6 +6,7 @@ import bot.stock.stobot.services.AnilistService;
 import bot.stock.stobot.services.MangaAltTitlesService;
 import bot.stock.stobot.services.MangaDataService;
 import bot.stock.stobot.services.MangaRegisterService;
+import bot.stock.stobot.utils.Manga;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -35,8 +36,7 @@ public class SaveService {
                                ScheduledFuture<?> timeoutTask) {
     }
 
-    @Value("${discord.color}")
-    private String discordColor;
+    private String discordColor = "0x038C73";
 
     public SaveService(AnilistService anilist,
                        MangaRegisterService mreg, MangaDataService mdata) {
@@ -66,7 +66,7 @@ public class SaveService {
         if (mangas.isEmpty() || !fullyEqual) {
             System.out.println("entre if");
             try {
-                AnilistService.MangaRecord result = anilist.searchManga(name)
+                Manga result = anilist.searchManga(name)
                         .block(Duration.ofSeconds(5));
 
                 if (result != null) {
