@@ -38,7 +38,7 @@ public class Embed {
 
     public MessageEmbed buildEmbedFromMeme(String meme){
         EmbedBuilder embed = setupBuilder();
-        embed.setDescription(meme+":");
+        embed.setTitle(meme.replace(".png", "").replace("_"," "));
         embed.setImage("attachment://" + meme);
         return embed.build();
 
