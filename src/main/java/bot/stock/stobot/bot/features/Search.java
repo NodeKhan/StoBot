@@ -19,12 +19,12 @@ import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Component
-public class SearchCommand extends ListenerAdapter implements CommandsProvider.PublicSlashCommand {
+public class Search extends ListenerAdapter implements CommandsProvider.PublicSlashCommand {
 
     private final AnilistService anilist;
     private final Embed embed;
 
-    public SearchCommand(AnilistService anilist, Embed embed) {
+    public Search(AnilistService anilist, Embed embed) {
         this.anilist = anilist;
         this.embed = embed;
     }

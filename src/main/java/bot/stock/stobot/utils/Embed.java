@@ -11,12 +11,16 @@ import org.springframework.stereotype.Component;
 public class Embed {
     private final Color embedColor = new Color(0x038C73);
 
-    public MessageEmbed buildEmbedFromManga(Manga manga){
+    private EmbedBuilder setupBuilder(){
         EmbedBuilder embed = new EmbedBuilder();
-        
+        embed.setColor(embedColor);
+        return embed;
+    }
+
+    public MessageEmbed buildEmbedFromManga(Manga manga){
+        EmbedBuilder embed = setupBuilder();
         embed.setTitle(manga.title());
         embed.setThumbnail(manga.coverUrl());
-        embed.setColor(embedColor);
 
         if(!manga.altTitles().isEmpty()){
             embed.setDescription(String.join("\n",manga.altTitles()));
@@ -30,6 +34,14 @@ public class Embed {
         embed.addField("Summary:", manga.description(),false);
 
         return embed.build();
+    }
+
+    public MessageEmbed buildEmbedFromMeme(String meme){
+        EmbedBuilder embed = setupBuilder();
+        embed.setDescription(meme+":");
+        embed.setImage("attachment://" + meme);
+        return embed.build();
+
     }
 
 }
