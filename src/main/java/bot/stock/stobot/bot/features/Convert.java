@@ -42,7 +42,7 @@ public class Convert extends ListenerAdapter implements CommandsProvider.PublicS
         event.deferReply().queue();
 
         try {
-            double amount = Double.parseDouble(amountStr);
+            double amount = Double.parseDouble(amountStr.replaceAll(" |,", ""));
 
             RestClient restClient = RestClient.create();
             Map<String, Object> response = restClient.get()
@@ -59,10 +59,12 @@ public class Convert extends ListenerAdapter implements CommandsProvider.PublicS
             }
 
             double result = amount / taux;
-            log.info("Convert {} {} → {} EUR (taux: {})", amount, currencyIN, result, taux);
+            String cutAmount = String.format("%.2f",amount).replaceAll("(\\d)(?=(\\d{3})+(?:\\.|$))", "$1,");
+            String cutResult = String.format("%.2f",result).replaceAll("(\\d)(?=(\\d{3})+(?:\\.|$))", "$1,");
+            log.info("Convert {} {} → {} EUR (taux: {})", cutAmount, currencyIN, cutResult, taux);
 
             event.getHook()
-                    .editOriginal(String.format("%.2f %s = **%.2f %s**", amount, currencyIN.toUpperCase(), result,currencyOUT.toUpperCase()))
+                    .editOriginal(String.format("%s %s = **%s %s**", cutAmount, currencyIN.toUpperCase(), cutResult,currencyOUT.toUpperCase()))
                     .queue();
 
         } catch (NumberFormatException e) {
