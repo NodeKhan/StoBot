@@ -6,7 +6,7 @@ public record Manga(
     String title,
     List<String> altTitles,
 
-    String status,
+    MediaStatus status,
     String format,
     int chapter,
     

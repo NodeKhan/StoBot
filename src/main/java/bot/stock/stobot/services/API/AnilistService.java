@@ -1,15 +1,21 @@
-package bot.stock.stobot.services;
+package bot.stock.stobot.services.API;
 
+import org.springframework.graphql.client.GraphQlTransportException;
 import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import bot.stock.stobot.utils.Manga;
+import bot.stock.stobot.utils.MediaStatus;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class AnilistService {
 
@@ -73,11 +79,12 @@ public class AnilistService {
         String title = resolveTitle(m.title());
         List<String> altTitles = resolveAltTitles(m.synonyms(), m.title(), title);
         String description = cleanDescription(m.description());
+        MediaStatus status = resolvStatus(m.status());
 
         return new Manga(
             title,
             altTitles,
-            m.status().toLowerCase(),
+            status,
             m.format(),
             m.chapters(),
             m.coverImage().large(),
@@ -107,5 +114,33 @@ public class AnilistService {
                 .replaceAll(HTML_TAG_PATTERN, "")
                 .replaceAll(SOURCE_PATTERN, "")
                 .strip();
+    }
+
+    private MediaStatus resolvStatus(String status){
+        return switch (status) {
+            case "RELEASING"    -> MediaStatus.ONGOING;
+            case "FINISHED"     -> MediaStatus.COMPLETED;
+            case "HIATUS"       -> MediaStatus.HIATUS;
+            case "CANCELLED"    -> MediaStatus.CANCELLED;
+            default             -> MediaStatus.UNKNOWN;
+        };
+    }
+
+    public String handleError(Throwable error, String search) {
+        if (isNotFound(error)) {
+            return "\"%s\" not found on AniList.".formatted(search);
+        }
+        if (error instanceof TimeoutException) {
+            log.warn("Timeout for '{}'", search);
+            return "Search timed out after 5 seconds. Please try again.";
+        }
+        log.error("Unexpected error during search for '{}'", search, error);
+        return "An unexpected error occurred while searching.";
+    }
+
+    private boolean isNotFound(Throwable error) {
+        return error instanceof GraphQlTransportException t
+                && t.getCause() instanceof WebClientResponseException ex
+                && ex.getStatusCode().value() == 404;
     }
 }

@@ -4,8 +4,13 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.awt.Color;
+import java.util.Collection;
 
 import org.springframework.stereotype.Component;
+
+import bot.stock.stobot.database.Media;
+import bot.stock.stobot.database.MediaTitle;
+import bot.stock.stobot.database.UserMedia;
 
 @Component
 public class Embed {
@@ -26,7 +31,7 @@ public class Embed {
             embed.setDescription(String.join("\n",manga.altTitles()));
         }
 
-        embed.addField("Status:", manga.status(),true);
+        embed.addField("Status:", manga.status().toString(),true);
         if(manga.chapter() != 0){
             embed.addField("Chapter:", ""+manga.chapter(),true);
         }
@@ -42,6 +47,42 @@ public class Embed {
         embed.setImage("attachment://" + meme);
         return embed.build();
 
+    }
+
+    public MessageEmbed buildEmbedFromMedia(Media media) {
+        EmbedBuilder embed = setupBuilder();
+        embed.setTitle(media.getMainTitle());
+        embed.setThumbnail(media.getCoverUrl());
+
+        if(!media.getTitles().isEmpty()){
+            
+            embed.setDescription(String.join("\n",media.getTitlesToStrings()));
+        }
+
+        embed.addField("Status:", media.getStatus().toString(),true);
+        if(media.getTotalChapters() != 0){
+            embed.addField("Chapter:", ""+media.getTotalChapters(),true);
+        }
+        return embed.build();
+    }
+
+    public MessageEmbed buildEmbedFromUserMedia(UserMedia userMedia) {
+        EmbedBuilder embed = setupBuilder();
+        Media media = userMedia.getMedia();
+
+        embed.setTitle(media.getMainTitle());
+        embed.setThumbnail(media.getCoverUrl());
+
+        if(!media.getTitles().isEmpty()){
+            embed.setDescription(String.join("\n",media.getTitlesToStrings()));
+        }
+
+        embed.addField("Status:", media.getStatus().toString(),true);
+        if(media.getTotalChapters() != 0){
+            embed.addField("Chapter:", ""+media.getTotalChapters(),true);
+        }
+        embed.addField("Current chapter:",""+userMedia.getChaptersRead(),true);
+        return embed.build();
     }
 
 }

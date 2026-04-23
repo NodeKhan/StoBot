@@ -1,7 +1,7 @@
 package bot.stock.stobot.bot.features;
 
 import bot.stock.stobot.bot.core.CommandsProvider;
-import bot.stock.stobot.services.AnilistService;
+import bot.stock.stobot.services.API.AnilistService;
 import bot.stock.stobot.utils.Embed;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -10,21 +10,18 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
-import org.springframework.graphql.client.GraphQlTransportException;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.Duration;
-import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Component
-public class Search extends ListenerAdapter implements CommandsProvider.PublicSlashCommand {
+public class SearchCommands extends ListenerAdapter implements CommandsProvider.PublicSlashCommand {
 
     private final AnilistService anilist;
     private final Embed embed;
 
-    public Search(AnilistService anilist, Embed embed) {
+    public SearchCommands(AnilistService anilist, Embed embed) {
         this.anilist = anilist;
         this.embed = embed;
     }
@@ -50,26 +47,10 @@ public class Search extends ListenerAdapter implements CommandsProvider.PublicSl
                                 .editOriginalEmbeds(embed.buildEmbedFromManga(manga))
                                 .queue(),
                         error -> event.getHook()
-                                .editOriginal(handleError(error, search))
+                                .editOriginal(anilist.handleError(error, search))
                                 .queue()
                 );
     }
 
-    private String handleError(Throwable error, String search) {
-        if (isNotFound(error)) {
-            return "\"%s\" not found on AniList.".formatted(search);
-        }
-        if (error instanceof TimeoutException) {
-            log.warn("Timeout for '{}'", search);
-            return "Search timed out after 5 seconds. Please try again.";
-        }
-        log.error("Unexpected error during search for '{}'", search, error);
-        return "An unexpected error occurred while searching.";
-    }
 
-    private boolean isNotFound(Throwable error) {
-        return error instanceof GraphQlTransportException t
-                && t.getCause() instanceof WebClientResponseException ex
-                && ex.getStatusCode().value() == 404;
-    }
 }

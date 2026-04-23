@@ -28,12 +28,12 @@ import net.dv8tion.jda.api.utils.FileUpload;
 
 @Slf4j
 @Component
-public class Meme extends ListenerAdapter implements CommandsProvider.PublicSlashCommand{
+public class MemeCommand extends ListenerAdapter implements CommandsProvider.PublicSlashCommand{
     
     private final Embed eb;
     private final Map<String, Resource> memeMap = new HashMap<>();
 
-    public Meme(Embed eb){
+    public MemeCommand(Embed eb){
         this.eb = eb;
 
         try {

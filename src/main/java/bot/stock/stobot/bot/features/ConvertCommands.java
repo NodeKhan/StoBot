@@ -16,7 +16,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 @Slf4j
 @Component
-public class Convert extends ListenerAdapter implements CommandsProvider.PublicSlashCommand {
+public class ConvertCommands extends ListenerAdapter implements CommandsProvider.PublicSlashCommand {
     
     @Override
     public CommandData command() {
