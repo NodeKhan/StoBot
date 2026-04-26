@@ -4,19 +4,17 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.awt.Color;
-import java.util.Collection;
 
 import org.springframework.stereotype.Component;
 
 import bot.stock.stobot.database.Media;
-import bot.stock.stobot.database.MediaTitle;
 import bot.stock.stobot.database.UserMedia;
 
 @Component
 public class Embed {
     private final Color embedColor = new Color(0x038C73);
 
-    private EmbedBuilder setupBuilder(){
+    public EmbedBuilder setupBuilder(){
         EmbedBuilder embed = new EmbedBuilder();
         embed.setColor(embedColor);
         return embed;

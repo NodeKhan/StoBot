@@ -41,11 +41,29 @@ public class UserMedia {
     @Column(name = "last_updated", nullable = false)
     private LocalDateTime lastUpdated = LocalDateTime.now();
 
-    @PreUpdate
-    public void preUpdate() { this.lastUpdated = LocalDateTime.now(); }
-
     public enum ReadingStatus {
-    READING, COMPLETED, DROPPED, PLAN_TO_READ
+    READING, COMPLETED, DROPPED, PLAN_TO_READ;
+        
+        public String display() {
+            return name().charAt(0) + name().substring(1).toLowerCase().replace('_', ' ');
+        }
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void onUpdate() {
+        this.lastUpdated = LocalDateTime.now();
+
+        if (this.readingStatus == ReadingStatus.DROPPED) return;
+
+        if (this.chaptersRead > 0 && this.readingStatus == ReadingStatus.PLAN_TO_READ) 
+            this.readingStatus = ReadingStatus.READING;
+
+        if(media != null
+            && media.getTotalChapters() != null
+            && media.getTotalChapters() > 0
+            && media.getTotalChapters() <= this.chaptersRead)
+            this.readingStatus = ReadingStatus.COMPLETED;
     }
 
 }

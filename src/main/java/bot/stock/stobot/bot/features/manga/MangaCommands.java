@@ -190,16 +190,39 @@ public class MangaCommands extends ListenerAdapter implements CommandsProvider.P
             event.getHook().editOriginal("No registered manga").queue();
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        for (UserMedia um : userMedias) {
-            sb.append(um.getMedia().getMainTitle()+"\t"+um.getReadingStatus()+"\t"+um.getChaptersRead());
-            if(um.getRating() != null){
-                sb.append("\t"+um.getRating());
-            }
-            sb.append("\n");
-        }
-        event.getHook().editOriginal(sb.toString()).queue();
 
+        event.getHook().editOriginal(buildTable(userMedias)).queue();
+
+    }
+
+    private String buildTable(List<UserMedia> userMedias) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("```diff\n");
+        sb.append(String.format("%-2s %-25s %-15s %s%n", "", "Titre", "Status", "Chap"));
+        sb.append("  ").append("─".repeat(47)).append("\n");
+
+        for (UserMedia um : userMedias) {
+            String prefix = switch (um.getReadingStatus()) {
+                case READING      -> " ";
+                case DROPPED      -> "-";
+                case COMPLETED    -> "+";
+                case PLAN_TO_READ -> "#";
+            };
+
+            sb.append(String.format("%-2s %-25s %-15s %d%n",
+                prefix,
+                truncate(um.getMedia().getMainTitle(), 25),
+                um.getReadingStatus().display(),
+                um.getChaptersRead()
+            ));
+        }
+
+        sb.append("```");
+        return sb.toString();
+    }
+
+    private String truncate(String s, int max) {
+        return s.length() <= max ? s : s.substring(0, max - 1) + "…";
     }
     
     private void handleSuggest(SlashCommandInteractionEvent event){
